@@ -1,0 +1,162 @@
+class Piece:
+    def __init__(self, color, position):
+        self.color = color
+        self.position = position
+
+    def __repr__(self):
+        return self.color[0].upper()
+
+    def can_move(self, destination, board):
+        raise NotImplementedError("Subclass must implement this method")
+
+class Pawn(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "P"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if self.color == "white":
+            if x2 == x1 + 1 and y1 == y2 and not board[x2][y2]:
+                return True
+            if x2 == x1 + 1 and abs(y2 - y1) == 1 and board[x2][y2] and board[x2][y2].color == "black":
+                return True
+        elif self.color == "black":
+            if x2 == x1 - 1 and y1 == y2 and not board[x2][y2]:
+                return True
+            if x2 == x1 - 1 and abs(y2 - y1) == 1 and board[x2][y2] and board[x2][y2].color == "white":
+                return True
+        return False
+
+class Rook(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "R"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if x1 != x2 and y1 != y2:
+            return False
+        if x1 == x2:
+            steps = [(0, 1) if y2 > y1 else (0, -1) for _ in range(abs(y2 - y1))]
+        else:
+            steps = [(1, 0) if x2 > x1 else (-1, 0) for _ in range(abs(x2 - x1))]
+        for step in steps:
+            x, y = x1 + step[0], y1 + step[1]
+            if board[x][y] and (x, y) != destination:
+                return False
+            x1, y1 = x, y
+        return True
+
+class Knight(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "N"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if abs(x2 - x1) == 2 and abs(y2 - y1) == 1:
+            return True
+        if abs(x2 - x1) == 1 and abs(y2 - y
+class Bishop(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "B"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if abs(x2 - x1) != abs(y2 - y1):
+            return False
+        steps = [(1, 1) if x2 > x1 and y2 > y1 else (1, -1) if x2 > x1 and y2 < y1 else (-1, 1) if x2 < x1 and y2 > y1 else (-1, -1) for _ in range(abs(x2 - x1))]
+        for step in steps:
+            x, y = x1 + step[0], y1 + step[1]
+            if board[x][y] and (x, y) != destination:
+                return False
+            x1, y1 = x, y
+        return True
+
+class Queen(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "Q"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if x1 == x2 or y1 == y2 or abs(x2 - x1) == abs(y2 - y1):
+            if x1 == x2:
+                steps = [(0, 1) if y2 > y1 else (0, -1) for _ in range(abs(y2 - y1))]
+            elif y1 == y2:
+                steps = [(1, 0) if x2 > x1 else (-1, 0) for _ in range(abs(x2 - x1))]
+            else:
+                steps = [(1, 1) if x2 > x1 and y2 > y1 else (1, -1) if x2 > x1 and y2 < y1 else (-1, 1) if x2 < x1 and y2 > y1 else (-1, -1) for _ in range(abs(x2 - x1))]
+            for step in steps:
+                x, y = x1 + step[0], y1 + step[1]
+                if board[x][y] and (x, y) != destination:
+                    return False
+                x1, y1 = x, y
+            return True
+        return False
+
+class King(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, position)
+
+    def __repr__(self):
+        return self.color[0].upper() + "K"
+
+    def can_move(self, destination, board):
+        x1, y1 = self.position
+        x2, y2 = destination
+        if abs(x2 - x1) > 1 or abs(y2 - y1) > 1:
+            return False
+        return True
+
+class Chess:
+    def __init__(self):
+        self.board = self.board = [[Rook("black", (0, 0)), Knight("black", (0, 1)), Bishop("black", (0, 2)), Queen("black", (0, 3)), King("black", (0, 4)), Bishop("black", (0, 5)), Knight("black", (0, 6)), Rook("black", (0, 7))],
+                      [Pawn("black", (1, i)) for i in range(8)],
+                      [None for _ in range(8)] for _ in range(6)] + [[Pawn("white", (6, i)) for i in range(8)],
+                                                                       [Rook("white", (7, 0)), Knight("white", (7, 1)), Bishop("white", (7, 2)), Queen("white", (7, 3)), King("white", (7, 4)), Bishop("white", (7, 5)), Knight("white", (7, 6)), Rook("white", (7, 7))]]
+        self.turn = "white"
+
+    def __repr__(self):
+        return "\n".join([" ".join([str(self.board[i][j]) if self.board[i][j] else "--" for j in range(8)]) for i in range(8)])
+
+    def make_move(self, origin, destination):
+        if not (0 <= origin[0] <= 7 and 0 <= origin[1] <= 7 and 0 <= destination[0] <= 7 and 0 <= destination[1] <= 7):
+            return False
+        piece = self.board[origin[0]][origin[1]]
+        if not piece:
+            return False
+        if piece.color != self.turn:
+            return False
+        if not piece.can_move(destination, self.board):
+            return False
+        self.board[destination[0]][destination[1]] = piece
+        self.board[origin[0]][origin[1]] = None
+        piece.position = destination
+        self.turn = "white" if self.turn == "black" else "black"
+        return True
+
+chess = Chess()
+print(chess)
+print(chess.make_move((6, 0), (4, 0)))
+print(chess)
+print(chess.make_move((1, 0), (3, 0)))
+print(chess)
+
